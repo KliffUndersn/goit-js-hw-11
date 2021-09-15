@@ -1,12 +1,10 @@
-// import Notiflix from "notiflix";
+import Notiflix from "notiflix";
 import axios from "axios";
-// import "@babel/polyfill";
 const refs = {
   form: document.querySelector('#search-form'),
   loadMoreBtn: document.querySelector('.load-more'),
   gallery: document.querySelector('.gallery'),
 }
-
 const cardMarkup = (card) => {const markup = card.map(({tags,webformatURL,views,downloads,likes})=>{
   return `<div class="photo-card">
 <img width="200"src="${webformatURL}" alt="${tags}" loading="lazy" />
@@ -26,30 +24,44 @@ const cardMarkup = (card) => {const markup = card.map(({tags,webformatURL,views,
 return refs.gallery.insertAdjacentHTML("beforeend",markup) ;
 }
 let page = 1;
-let querySearch = ""
-
+let querySearch = "";
+let totalHits = 0;
+let currentHits = 0;
+refs.loadMoreBtn.disabled = true; 
 async function getCards(query,page) {
-  const response = await fetch(`https://pixabay.com/api/?key=23372923-aa63da10459dab2a89fc14fe7&q=${query}&page=${page}&per_page=3`)
-  const then = await response.data.hits;
-return then
+  const urlsearch =  new URLSearchParams ({
+    key:`23372923-aa63da10459dab2a89fc14fe7`,
+    q: query,image_type: `photo`,orientation: `horizontal`,safesearch: true,per_page: 40,page,
+  })
+    try {
+const res = await axios.get(`https://pixabay.com/api/?${urlsearch}`)
+  cardMarkup(res.data.hits);
+  totalHits = await res.data.totalHits;
+  if (res.data.hits.length === 0){ Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.')}
+} catch (error) {
+    Notiflix.Notify.failure('Oops! Something went wrong 😱, try again later')
+  }
 };
-
- async function searchInput(e) {
+const searchInput = (e) => {
+  refs.loadMoreBtn.disabled = false; 
   page = 1;
   refs.gallery.innerHTML = ''
   e.preventDefault();
   querySearch = e.target.elements.searchQuery.value.trim();
-  const get = await getCards(querySearch,page)
-  try {
-    console.log("object");
-    cardMarkup({})
-   } catch (error) {
-     console.log(error);
-   }
+  const get = getCards(querySearch,page);
+  currentHits += 40
 }
 const searchButton = (e) => {
+
+  if (totalHits>=currentHits){
+    currentHits += 40
   page += 1
-  const get = getCards(querySearch,page)
+  const get = getCards(querySearch,page)}
+  else {
+    Notiflix.Notify.failure(`We're sorry, but you've reached the end of search results.`)
+    refs.loadMoreBtn.disabled = true; 
+  }
+  console.log(currentHits);
 }
-refs.form.addEventListener('input', searchInput)
+refs.form.addEventListener('submit', searchInput)
 refs.loadMoreBtn.addEventListener('click',searchButton)

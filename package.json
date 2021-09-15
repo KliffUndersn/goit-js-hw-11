@@ -3,10 +3,10 @@
   "version": "1.1.0",
   "description": "",
   "main": "index.html",
-  "homepage": "https://kliffundersn.github.io/goit-js-hw-10/",
+  "homepage": "https://kliffundersn.github.io/goit-js-hw-11/",
   "scripts": {
     "dev": "parcel src/index.html src/*.html",
-    "build": "parcel build src/index.html src/*.html --public-url /goit-js-hw-10/",
+    "build": "parcel build src/index.html src/*.html --public-url /goit-js-hw-11/",
     "deploy": "gh-pages -d dist",
     "predeploy": "npm run build"
   },
